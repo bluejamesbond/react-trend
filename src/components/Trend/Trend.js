@@ -168,7 +168,7 @@ class Trend extends Component {
       rangeHighlightStart = normalizedValues[first].x;
       rangeHighlightEnd = normalizedValues[second].x;
 
-      const gap = normalizedValues[first + 1].x - normalizedValues[first].x;
+      const gap = normalizedValues[1].x - normalizedValues[0].x;
 
       rangeHighlightStart -= gap / 2;
       rangeHighlightEnd += gap / 2;
