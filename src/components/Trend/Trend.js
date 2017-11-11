@@ -29,8 +29,13 @@ const propTypes = {
   padding: PropTypes.number,
   radius: PropTypes.number,
   gradient: PropTypes.arrayOf(PropTypes.string),
-  rangeHighlight: PropTypes.arrayOf(PropTypes.number, PropTypes.number),  
+  rangeHighlight: PropTypes.arrayOf(PropTypes.number, PropTypes.number),
   rangeHighlightColor: PropTypes.string,
+  hoverLineColor: PropTypes.string,
+  hoverLineWidth: PropTypes.number,
+  hoverTextColor: PropTypes.string,
+  hoverTextSize: PropTypes.number,
+  hoverTextWeight: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 const defaultProps = {
@@ -42,7 +47,12 @@ const defaultProps = {
   autoDrawDuration: 2000,
   autoDrawEasing: 'ease',
   rangeHighlight: [],
-  rangeHighlightColor: 'transparent'  
+  rangeHighlightColor: 'transparent',
+  hoverTextColor: '#aaa',
+  hoverTextSize: 14,
+  hoverTextWeight: 'bold',
+  hoverLineColor: 'red',
+  hoverLineWidth: 2,
 };
 
 class Trend extends Component {
@@ -54,6 +64,10 @@ class Trend extends Component {
     // animations.
     this.trendId = generateId();
     this.gradientId = `react-trend-vertical-gradient-${this.trendId}`;
+    this.hoverTextNode = null;
+    this.svgNode = null;
+    this.hoverTimeout = null;
+    this.hoverLineNode = null;
   }
 
   componentDidMount() {
@@ -73,8 +87,39 @@ class Trend extends Component {
     }
   }
 
+  componentWillUnmount() {
+    clearTimeout(this.hoverTimeout);
+  }
+
   getDelegatedProps() {
     return omit(this.props, Object.keys(propTypes));
+  }
+
+  handleMouseMove(e, values) {
+    const { offsetX: x } = e.nativeEvent;
+    const { svgNode, path, hoverTextNode, hoverLineNode } = this;
+    const svgRect = svgNode.getBoundingClientRect();
+    const pathRect = path.getBoundingClientRect();
+
+    if (x >= pathRect.left - svgRect.left && x <= pathRect.left - svgRect.left + pathRect.width) {
+      const computedX = x - (pathRect.left - svgRect.left);
+      const value = values[Math.round(computedX / pathRect.width * (values.length - 1))];
+
+      hoverTextNode.innerHTML = value;
+
+      hoverLineNode.setAttribute('opacity', 1);
+      hoverLineNode.setAttribute('x1', `${x / svgRect.width * 100}%`);
+      hoverLineNode.setAttribute('x2', `${x / svgRect.width * 100}%`);
+
+      clearTimeout(this.hoverTimeout);
+      this.hoverTimeout = setTimeout(() => {
+        hoverLineNode.setAttribute('opacity', 0);
+        hoverTextNode.innerHTML = '';
+      }, 1000);
+    } else {
+      hoverLineNode.setAttribute('opacity', 0);
+      hoverTextNode.innerHTML = '';
+    }
   }
 
   renderGradientDefinition() {
@@ -119,6 +164,11 @@ class Trend extends Component {
       gradient,
       rangeHighlight,
       rangeHighlightColor,
+      hoverTextSize,
+      hoverTextColor,
+      hoverTextWeight,
+      hoverLineColor,
+      hoverLineWidth,
     } = this.props;
 
     // We need at least 2 points to draw a graph.
@@ -176,8 +226,10 @@ class Trend extends Component {
 
     return (
       <svg
+        onMouseMove={(e) => { this.handleMouseMove(e, plainValues); }}
         width={svgWidth}
         height={svgHeight}
+        ref={(ref) => { this.svgNode = ref; }}
         viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
         {...this.getDelegatedProps()}
       >
@@ -196,6 +248,25 @@ class Trend extends Component {
           d={path}
           fill="none"
           stroke={gradient ? `url(#${this.gradientId})` : undefined}
+        />
+        <text
+          fill={hoverTextColor}
+          fontSize={hoverTextSize}
+          fontWeight={hoverTextWeight}
+          stroke="none"
+          alignmentBaseline="hanging"
+          textAnchor="top"
+          ref={(ref) => { this.hoverTextNode = ref; }}
+        />
+        <line
+          opacity={0}
+          ref={(ref) => { this.hoverLineNode = ref; }}
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="100%"
+          stroke={hoverLineColor}
+          strokeWidth={hoverLineWidth}
         />
       </svg>
     );
