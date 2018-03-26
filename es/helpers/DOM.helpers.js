@@ -23,6 +23,7 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
   points[0] = 'M ' + firstPoint.x + ',' + firstPoint.y;
 
   for (var i = 1, length = data.length; i < length; i++) {
+    var point = data[i];
     var next = data[i + 1];
     var prev = data[i - 1] || firstPoint;
 
