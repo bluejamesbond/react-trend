@@ -22,8 +22,8 @@ export const buildSmoothPath = (data, { radius }) => {
   points[0] = `M ${firstPoint.x},${firstPoint.y}`;
 
   for (let i = 1, length = data.length; i < length; i++) {
-    const next = otherPoints[index + 1];
-    const prev = otherPoints[index - 1] || firstPoint;
+    const next = data[i + 1];
+    const prev = data[i - 1] || firstPoint;
 
     const isCollinear = next && checkForCollinearPoints(prev, point, next);
 
