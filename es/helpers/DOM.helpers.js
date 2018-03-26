@@ -20,7 +20,7 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
       otherPoints = data.slice(1);
 
 
-  return otherPoints.reduce(function (path, point, index) {
+  return 'M ' + firstPoint.x + ',' + firstPoint.y + '\n' + otherPoints.map(function (point, index) {
     var next = otherPoints[index + 1];
     var prev = otherPoints[index - 1] || firstPoint;
 
@@ -28,7 +28,7 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
 
     if (!next || isCollinear) {
       // The very last line in the sequence can just be a regular line.
-      return path + '\nL ' + point.x + ',' + point.y;
+      return 'L ' + point.x + ',' + point.y;
     }
 
     var distanceFromPrev = getDistanceBetween(prev, point);
@@ -42,8 +42,8 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
     var before = moveTo(prev, point, radiusForPoint);
     var after = moveTo(next, point, radiusForPoint);
 
-    return [path, 'L ' + before.x + ',' + before.y, 'S ' + point.x + ',' + point.y + ' ' + after.x + ',' + after.y].join('\n');
-  }, 'M ' + firstPoint.x + ',' + firstPoint.y);
+    return 'L ' + before.x + ',' + before.y + '\nS ' + point.x + ',' + point.y + ' ' + after.x + ',' + after.y;
+  }).join('\n');
 };
 
 // Taken from Khan Academy's Aphrodite
