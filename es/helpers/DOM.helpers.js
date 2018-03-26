@@ -1,7 +1,5 @@
 import { moveToOpt, getDistanceBetween, checkForCollinearPoints } from './math.helpers';
 
-import _ from 'lodash';
-
 export var buildLinearPath = function buildLinearPath(data) {
   return data.reduce(function (path, _ref, index) {
     var x = _ref.x,
@@ -18,11 +16,13 @@ export var buildLinearPath = function buildLinearPath(data) {
 
 export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
   var radius = _ref2.radius;
-  var firstPoint = data[0],
-      otherPoints = data.slice(1);
 
+  var firstPoint = data[0];
+  var points = Array(data.length);
 
-  return 'M ' + firstPoint.x + ',' + firstPoint.y + '\n' + _.map(otherPoints, function (point, index) {
+  points[0] = 'M ' + firstPoint.x + ',' + firstPoint.y;
+
+  for (var i = 1, length = data.length; i < length; i++) {
     var next = otherPoints[index + 1];
     var prev = otherPoints[index - 1] || firstPoint;
 
@@ -30,7 +30,8 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
 
     if (!next || isCollinear) {
       // The very last line in the sequence can just be a regular line.
-      return 'L ' + point.x + ',' + point.y;
+      points[i] = 'L ' + point.x + ',' + point.y;
+      continue;
     }
 
     var distanceFromPrev = getDistanceBetween(prev, point);
@@ -44,8 +45,10 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
     var before = moveToOpt(prev, point, radiusForPoint);
     var after = moveToOpt(next, point, radiusForPoint);
 
-    return 'L ' + before[0] + ',' + before[1] + '\nS ' + point.x + ',' + point.y + ' ' + after[0] + ',' + after[1];
-  }).join('\n');
+    points[i] = 'L ' + before[0] + ',' + before[1] + '\nS ' + point.x + ',' + point.y + ' ' + after[0] + ',' + after[1];
+  }
+
+  return points.join('\n');
 };
 
 // Taken from Khan Academy's Aphrodite

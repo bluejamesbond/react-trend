@@ -4,8 +4,6 @@ import {
   checkForCollinearPoints,
 } from './math.helpers';
 
-import _ from 'lodash';
-
 export const buildLinearPath = data => (
   data.reduce((path, { x, y }, index) => {
     // The very first instruction needs to be a "move".
@@ -18,9 +16,12 @@ export const buildLinearPath = data => (
 );
 
 export const buildSmoothPath = (data, { radius }) => {
-  const [firstPoint, ...otherPoints] = data;
+  let firstPoint = data[0];
+  let points = Array(data.length);
   
-  return `M ${firstPoint.x},${firstPoint.y}\n${_.map(otherPoints, (point, index) => {
+  points[0] = `M ${firstPoint.x},${firstPoint.y}`;
+
+  for (let i = 1, length = data.length; i < length; i++) {
     const next = otherPoints[index + 1];
     const prev = otherPoints[index - 1] || firstPoint;
 
@@ -28,7 +29,8 @@ export const buildSmoothPath = (data, { radius }) => {
 
     if (!next || isCollinear) {
       // The very last line in the sequence can just be a regular line.
-      return `L ${point.x},${point.y}`;
+      points[i] = `L ${point.x},${point.y}`;
+      continue;
     }
 
     const distanceFromPrev = getDistanceBetween(prev, point);
@@ -42,8 +44,10 @@ export const buildSmoothPath = (data, { radius }) => {
     const before = moveToOpt(prev, point, radiusForPoint);
     const after = moveToOpt(next, point, radiusForPoint);
     
-    return `L ${before[0]},${before[1]}\nS ${point.x},${point.y} ${after[0]},${after[1]}`;
-  }).join('\n')}`;
+    points[i] = `L ${before[0]},${before[1]}\nS ${point.x},${point.y} ${after[0]},${after[1]}`;
+  }
+  
+  return points.join('\n');
 };
 
 // Taken from Khan Academy's Aphrodite
