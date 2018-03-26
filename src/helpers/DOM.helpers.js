@@ -1,8 +1,10 @@
 import {
-  moveTo,
+  moveToOpt,
   getDistanceBetween,
   checkForCollinearPoints,
 } from './math.helpers';
+
+import _ from 'lodash';
 
 export const buildLinearPath = data => (
   data.reduce((path, { x, y }, index) => {
@@ -18,7 +20,7 @@ export const buildLinearPath = data => (
 export const buildSmoothPath = (data, { radius }) => {
   const [firstPoint, ...otherPoints] = data;
   
-  return `M ${firstPoint.x},${firstPoint.y}\n${otherPoints.map((point, index) => {
+  return `M ${firstPoint.x},${firstPoint.y}\n${_.map(otherPoints, (point, index) => {
     const next = otherPoints[index + 1];
     const prev = otherPoints[index - 1] || firstPoint;
 
@@ -37,10 +39,10 @@ export const buildSmoothPath = (data, { radius }) => {
 
     const radiusForPoint = isTooCloseForRadius ? threshold / 2 : radius;
 
-    const before = moveTo(prev, point, radiusForPoint);
-    const after = moveTo(next, point, radiusForPoint);
+    const before = moveToOpt(prev, point, radiusForPoint);
+    const after = moveToOpt(next, point, radiusForPoint);
     
-    return `L ${before.x},${before.y}\nS ${point.x},${point.y} ${after.x},${after.y}`;
+    return `L ${before[0]},${before[1]}\nS ${point.x},${point.y} ${after[0]},${after[1]}`;
   }).join('\n')}`;
 };
 

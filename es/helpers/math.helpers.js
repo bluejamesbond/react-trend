@@ -43,14 +43,33 @@ export var normalize = function normalize(_ref) {
  * @returns {Object} an object holding the x/y coordinates of the midpoint.
  */
 export var moveTo = function moveTo(to, from, radius) {
+  var out = moveToOpt(to, from, radius);
+
+  return {
+    x: out[0],
+    y: out[1]
+  };
+};
+
+/** moveTo
+ * the coordinate that lies at a midpoint between 2 lines, based on the radius
+ *
+ * @param {Object} to - Our initial point
+ * @param {Number} to.x - The x value of our initial point
+ * @param {Number} to.y - The y value of our initial point
+ * @param {Object} from - Our final point
+ * @param {Number} from.x - The x value of our final point
+ * @param {Number} from.y - The y value of our final point
+ * @param {Number} radius - The distance away from the final point
+ *
+ * @returns {Array} an array holding the x/y coordinates of the midpoint.
+ */
+export var moveToOpt = function moveToOpt(to, from, radius) {
   var vector = { x: to.x - from.x, y: to.y - from.y };
   var length = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
   var unitVector = { x: vector.x / length, y: vector.y / length };
 
-  return {
-    x: from.x + unitVector.x * radius,
-    y: from.y + unitVector.y * radius
-  };
+  return [from.x + unitVector.x * radius, from.y + unitVector.y * radius];
 };
 
 /** getDistanceBetween

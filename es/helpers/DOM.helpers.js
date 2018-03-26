@@ -1,4 +1,6 @@
-import { moveTo, getDistanceBetween, checkForCollinearPoints } from './math.helpers';
+import { moveToOpt, getDistanceBetween, checkForCollinearPoints } from './math.helpers';
+
+import _ from 'lodash';
 
 export var buildLinearPath = function buildLinearPath(data) {
   return data.reduce(function (path, _ref, index) {
@@ -20,7 +22,7 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
       otherPoints = data.slice(1);
 
 
-  return 'M ' + firstPoint.x + ',' + firstPoint.y + '\n' + otherPoints.map(function (point, index) {
+  return 'M ' + firstPoint.x + ',' + firstPoint.y + '\n' + _.map(otherPoints, function (point, index) {
     var next = otherPoints[index + 1];
     var prev = otherPoints[index - 1] || firstPoint;
 
@@ -39,10 +41,10 @@ export var buildSmoothPath = function buildSmoothPath(data, _ref2) {
 
     var radiusForPoint = isTooCloseForRadius ? threshold / 2 : radius;
 
-    var before = moveTo(prev, point, radiusForPoint);
-    var after = moveTo(next, point, radiusForPoint);
+    var before = moveToOpt(prev, point, radiusForPoint);
+    var after = moveToOpt(next, point, radiusForPoint);
 
-    return 'L ' + before.x + ',' + before.y + '\nS ' + point.x + ',' + point.y + ' ' + after.x + ',' + after.y;
+    return 'L ' + before[0] + ',' + before[1] + '\nS ' + point.x + ',' + point.y + ' ' + after[0] + ',' + after[1];
   }).join('\n');
 };
 

@@ -35,15 +35,38 @@ export const normalize = ({ value, min, max, scaleMin = 0, scaleMax = 1 }) => {
  * @returns {Object} an object holding the x/y coordinates of the midpoint.
  */
 export const moveTo = (to, from, radius) => {
+  const out = moveToOpt(to, from, radius);
+
+  return {
+    x: out[0],
+    y: out[1],
+  };
+};
+
+/** moveTo
+ * the coordinate that lies at a midpoint between 2 lines, based on the radius
+ *
+ * @param {Object} to - Our initial point
+ * @param {Number} to.x - The x value of our initial point
+ * @param {Number} to.y - The y value of our initial point
+ * @param {Object} from - Our final point
+ * @param {Number} from.x - The x value of our final point
+ * @param {Number} from.y - The y value of our final point
+ * @param {Number} radius - The distance away from the final point
+ *
+ * @returns {Array} an array holding the x/y coordinates of the midpoint.
+ */
+export const moveToOpt = (to, from, radius) => {
   const vector = { x: to.x - from.x, y: to.y - from.y };
   const length = Math.sqrt((vector.x * vector.x) + (vector.y * vector.y));
   const unitVector = { x: vector.x / length, y: vector.y / length };
 
-  return {
-    x: from.x + unitVector.x * radius,
-    y: from.y + unitVector.y * radius,
-  };
+  return [
+    from.x + unitVector.x * radius,
+    from.y + unitVector.y * radius,
+  ];
 };
+
 
 /** getDistanceBetween
  * Simple formula derived from pythagoras to calculate the distance between
